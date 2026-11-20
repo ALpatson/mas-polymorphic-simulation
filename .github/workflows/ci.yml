@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: javac build, self-tests, simulation checks (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ["21", "25"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Compile (warnings are errors)
+        run: |
+          mkdir -p out
+          javac --release 21 -Xlint:all -Werror -encoding UTF-8 -d out -sourcepath src/main/java \
+            src/main/java/mas/Main.java src/main/java/mas/SelfTest.java
+
+      - name: Self-tests (map, Singleton, SafeZone, EP, BFS, Knight, RPS)
+        run: java -cp out mas.SelfTest
+
+      - name: Simulation ends with a winner or a draw (seeds 1-10)
+        run: |
+          for seed in $(seq 1 10); do
+            out=$(java -cp out mas.Main "$seed" --quiet --no-color)
+            echo "$out" | grep -q "END OF SIMULATION" || { echo "seed $seed: no end"; exit 1; }
+            echo "$out" | grep -Eq "WINNER|DRAW"     || { echo "seed $seed: no result"; exit 1; }
+            echo "seed $seed: $(echo "$out" | grep -E 'WINNER|DRAW')"
+          done
+
+      - name: Same seed replays the same simulation
+        run: |
+          java -cp out mas.Main 42 300 0 --console --no-color > run1.txt
+          java -cp out mas.Main 42 300 0 --console --no-color > run2.txt
+          diff -q run1.txt run2.txt
+
+      - name: Step limit is respected
+        run: |
+          java -cp out mas.Main 7 5 --quiet --no-color | grep -q "after 5 steps"
+
+  maven:
+    name: Maven / NetBeans build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: mvn package
+        run: mvn -B -q package
+      - name: Run the packaged jar
+        run: java -jar target/mas-simulation-1.0.jar 1 --quiet --no-color
+
+  windows-scripts:
+    name: Windows build.bat / run.bat
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: build.bat
+        shell: cmd
+        run: build.bat
+      - name: run.bat
+        shell: cmd
+        run: run.bat 3 --quiet --no-color
