@@ -5,6 +5,7 @@ import java.awt.GraphicsEnvironment;
 import javax.swing.SwingUtilities;
 
 import mas.sim.Simulation;
+import mas.sim.Statistics;
 import mas.view.ConsoleRenderer;
 import mas.view.gui.SimulationWindow;
 
@@ -33,8 +34,13 @@ public final class Main {
         boolean console = false;
         Boolean color = null;
 
+        int statsRuns = 0;
         int positional = 0;
         for (String arg : args) {
+            if (arg.startsWith("--stats=")) {
+                statsRuns = Integer.parseInt(arg.substring("--stats=".length()));
+                continue;
+            }
             switch (arg) {
                 case "--console" -> console = true;
                 case "--fast" -> delayMs = 0;
@@ -43,7 +49,7 @@ public final class Main {
                 case "--no-color" -> color = false;
                 case "--help", "-h" -> {
                     System.out.println("Usage: run [seed|random] [maxSteps] [delayMs] "
-                            + "[--console] [--fast] [--quiet] [--color|--no-color]");
+                            + "[--console] [--fast] [--quiet] [--color|--no-color] [--stats=N]");
                     return;
                 }
                 default -> {
@@ -61,6 +67,11 @@ public final class Main {
                     }
                 }
             }
+        }
+
+        if (statsRuns > 0) {
+            Statistics.run(statsRuns, seed, maxSteps);
+            return;
         }
 
         if (!console && !quiet && !GraphicsEnvironment.isHeadless()) {

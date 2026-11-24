@@ -30,6 +30,18 @@ the simulation.
 [--fast] [--quiet] [--no-color]`. `run.bat 7 --quiet` prints only the result.
 The same seed always replays the same simulation.
 
+**Statistics (bonus)**: `run.bat 1 --stats=100` plays 100 games (seeds 1 to 100) and prints the
+win rate of each population.
+
+## Documents (`docs/`)
+
+| File | What it is |
+|---|---|
+| `docs/report/MAS_report.pdf` | The 6-page report to hand in (Word source: `MAS_report.docx`) |
+| `docs/uml/*.drawio` | Class (2 pages), state-machine, activity and sequence diagrams: open them in draw.io |
+| `docs/uml/png/`, `docs/uml/pdf/` | The same diagrams as images and as vector PDFs |
+| `docs/uml/tools/` | Scripts that regenerate the `.drawio` files from the Java code: `py extract.py src/main/java members.json` then `py gen.py members.json docs/uml` |
+
 ## Code map
 
 | Package | Contents |
