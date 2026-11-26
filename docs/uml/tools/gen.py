@@ -227,14 +227,12 @@ class Placer:
 P = Placer(core)
 G = 40
 Y0 = 150
-# ---------------- band 1: engine + beings
-r1, b1 = P.stack(["Main", "Simulation", "EventManager", "Statistics"], 20, Y0)
-r2, b2 = P.stack(["RandomGen", "EventLog", "SelfTest"], r1 + G, Y0)
-xm = r2 + G * 1.5
-P.put("Being", xm, Y0)
+# Portrait layout (fits an upright A4 page): three bands stacked vertically.
+# ---------------- band A: the Being hierarchy and the Masters
+P.put("Being", 20, Y0)
 agent_y = Y0 + P.geo["Being"][3] + G * 1.5
-P.put("Agent", xm, agent_y)
-xs = xm + P.geo["Agent"][2] + G * 1.5
+P.put("Agent", 20, agent_y)
+xs = 20 + P.geo["Agent"][2] + G * 1.5
 P.put("GoodAgent", xs, agent_y)
 y = agent_y + P.geo["GoodAgent"][3] + G
 _, y = P.row(["Elf", "Human"], xs, y)
@@ -248,26 +246,33 @@ P.put("Master", xmas, Y0)
 my = Y0 + P.geo["Master"][3] + G * 1.2
 _, my = P.row(["MasterElf", "MasterHuman"], xmas, my)
 _, my = P.row(["MasterOrc", "MasterGoblin"], xmas, my + 24)
-band1_bottom = max(b1, b2, y, agent_y + P.geo["Agent"][3], my)
+bandA_bottom = max(y, agent_y + P.geo["Agent"][3], my)
 
-# ---------------- band 2: view, movement, environment, enums
-Y2 = band1_bottom + G * 2
-rv, bv = P.stack(["SimulationView", "ConsoleRenderer"], 20, Y2)
-P.put("InstanceCounters", rv + G, Y2)
-legend(core, rv + G, Y2 + P.geo["InstanceCounters"][3] + 30)
-xmv = rv + G + 290
-P.put("MovementStrategy", xmv, Y2)
-lm_y = Y2 + P.geo["MovementStrategy"][3] + G
-P.put("LineMove", xmv, lm_y)
-P.put("KnightMove", xmv + P.geo["LineMove"][2] + G, lm_y)
-rmv, bmv = P.row(["QueenMove", "BishopMove", "RookMove"], xmv, lm_y + max(P.geo["LineMove"][3], P.geo["KnightMove"][3]) + G * 1.3)
-mv_right = max(rmv, P.geo["KnightMove"][0] + P.geo["KnightMove"][2])
-xr = mv_right + G * 1.5
-r5, _ = P.stack(["Map", "Tile", "SafeZone"], xr, Y2)
-r6, _ = P.stack(["Position", "Direction", "Population"], r5 + G, Y2)
-r7, b7 = P.stack(["Config", "AgentState"], r6 + G, Y2)
-P.stack(["RpsChoice", "Alliance"], r6 + G + P.geo["AgentState"][2] + 24, P.geo["AgentState"][1])
+# ---------------- band B: movement (under Agent), environment and enums
+YB = bandA_bottom + G * 2.2
+P.put("MovementStrategy", 20, YB)
+lm_y = YB + P.geo["MovementStrategy"][3] + G
+P.put("LineMove", 20, lm_y)
+qbr_y = lm_y + P.geo["LineMove"][3] + G * 1.3
+_, qbr_bottom = P.row(["QueenMove", "BishopMove", "RookMove"], 20, qbr_y)
+P.put("KnightMove", 20, qbr_bottom + G * 1.3)
+mv_right = max(P.geo[n][0] + P.geo[n][2] for n in ["MovementStrategy", "LineMove", "RookMove", "KnightMove"])
+xmap = mv_right + G * 2.5
+rmap, _ = P.stack(["Map", "Tile", "SafeZone"], xmap, YB)
+rpos, _ = P.stack(["Position", "Direction"], rmap + G * 1.5, YB)
+P.stack(["Population", "AgentState", "RpsChoice", "Alliance"], rpos + G, YB)
+bandB_bottom = max(P.geo[n][1] + P.geo[n][3] for n in P.geo)
+
+# ---------------- band C: the engine, the views and the configuration
+YC = bandB_bottom + G * 3
+r1, _ = P.stack(["Simulation", "EventManager", "Statistics"], 20, YC)
+r2, _ = P.stack(["RandomGen", "EventLog", "Main"], r1 + G * 1.2, YC)
+r3, _ = P.stack(["SimulationView", "ConsoleRenderer"], r2 + G, YC)
+r4, b4 = P.stack(["SelfTest", "InstanceCounters"], r3 + G, YC)
+legend(core, r3 + G, b4)
+P.stack(["Config"], r4 + G, YC)
 ids, geo = P.ids, P.geo
+far_right = max(geo[n][0] + geo[n][2] for n in geo) + 40
 
 E = core.edge
 
@@ -303,33 +308,36 @@ E(ids["MasterGoblin"], ids["Master"], INHERIT + side(1, 0.5, 1, 0.85),
   points=[(gx("MasterGoblin", 1) + 18, gy("MasterGoblin", 0.5)), (gx("MasterGoblin", 1) + 18, gy("Master", 0.85))])
 for c in ["QueenMove", "BishopMove", "RookMove"]:
     E(ids[c], ids["LineMove"], INHERIT + UP)
-E(ids["LineMove"], ids["MovementStrategy"], REALIZE + side(0.5, 0, 0.3, 1))
-E(ids["KnightMove"], ids["MovementStrategy"], REALIZE + side(0.5, 0, 0.8, 1))
+E(ids["LineMove"], ids["MovementStrategy"], REALIZE + side(0.5, 0, 0.5, 1))
+E(ids["KnightMove"], ids["MovementStrategy"], REALIZE + side(1, 0.5, 1, 0.5),
+  points=[(mv_right + 25, gy("KnightMove", 0.5)), (mv_right + 25, gy("MovementStrategy", 0.5))])
 E(ids["ConsoleRenderer"], ids["SimulationView"], REALIZE + UP)
-# associations and dependencies
-E(ids["Main"], ids["Simulation"], DEPEND + DOWN, "creates")
-E(ids["Simulation"], ids["EventManager"], COMPOSE + DOWN, "events 1")
-E(ids["Statistics"], ids["Simulation"], DEPEND + side(1, 0.5, 0.95, 1), "replays N games",
-  points=[(gx("Simulation", 0.95), gy("Statistics", 0.5))])
-E(ids["Simulation"], ids["RandomGen"], ASSOC + side(1, 0.06, 0, 0.5), "rng 1")
-E(ids["Simulation"], ids["EventLog"], COMPOSE + side(1, 0.5, 0, 0.3), "log 1")
-lane_x = gx("EventLog", 1) + 25
-E(ids["Simulation"], ids["Agent"], AGGREG + side(1, 0.3, 0, 0.35), "agents 16",
-  points=[(lane_x, gy("Simulation", 0.3)), (lane_x, gy("Agent", 0.35))])
-E(ids["Simulation"], ids["Master"], AGGREG + side(0.6, 0, 0.5, 0), "masters 4",
-  points=[(gx("Simulation", 0.6), Y0 - 35), (gx("Master", 0.5), Y0 - 35)])
-E(ids["Simulation"], ids["SimulationView"], DEPEND + side(0.2, 1, 0.3, 0), "renders on",
-  points=[(gx("Simulation", 0.2), Y2 - 40), (gx("SimulationView", 0.3), Y2 - 40)])
-E(ids["Simulation"], ids["Map"], COMPOSE + side(0.8, 1, 0.3, 0), "map 1",
-  points=[(gx("Simulation", 0.8), Y2 - 55), (gx("Map", 0.3), Y2 - 55)])
+# associations and dependencies inside a band
 E(ids["Agent"], ids["Master"], ASSOC + side(1, 0.97, 0, 0.6), "master 1",
   points=[(xmas - 45, gy("Agent", 0.97)), (xmas - 45, gy("Master", 0.6))])
-E(ids["Agent"], ids["MovementStrategy"], COMPOSE + side(0.5, 1, 0.5, 0), "movement 1",
-  points=[(gx("Agent", 0.5), Y2 - 25), (gx("MovementStrategy", 0.5), Y2 - 25)])
+E(ids["Agent"], ids["MovementStrategy"], COMPOSE + side(0.3, 1, 0.3, 0), "movement 1")
 E(ids["Map"], ids["Tile"], COMPOSE + DOWN, "tiles n*m")
 E(ids["Map"], ids["SafeZone"], COMPOSE + side(1, 0.9, 1, 0.1), "safeZones 4",
   points=[(gx("Map", 1) + 20, gy("Map", 0.9)), (gx("Map", 1) + 20, gy("SafeZone", 0.1))])
-# Master.safeZone and Tile.occupant are shown as typed attributes (no long connector).
+E(ids["Simulation"], ids["EventManager"], COMPOSE + DOWN, "events 1")
+E(ids["Statistics"], ids["Simulation"], DEPEND + side(1, 0.5, 1, 0.9), "replays N games",
+  points=[(gx("Simulation", 1) + 14, gy("Statistics", 0.5)), (gx("Simulation", 1) + 14, gy("Simulation", 0.9))])
+E(ids["Simulation"], ids["RandomGen"], ASSOC + side(1, 0.06, 0, 0.5), "rng 1")
+E(ids["Simulation"], ids["EventLog"], COMPOSE + side(1, 0.5, 0, 0.3), "log 1")
+E(ids["Main"], ids["Simulation"], DEPEND + side(0, 0.5, 1, 0.75), "creates",
+  points=[(gx("Simulation", 1) + 28, gy("Main", 0.5)), (gx("Simulation", 1) + 28, gy("Simulation", 0.75))])
+# associations from the engine (band C) up to bands A and B, each on its own lane
+lane = bandB_bottom + 25
+E(ids["Simulation"], ids["Agent"], AGGREG + side(0.85, 0, 0.85, 1), "agents 16",
+  points=[(gx("Simulation", 0.85), lane), (mv_right + 55, lane), (mv_right + 55, bandA_bottom + 25),
+          (gx("Agent", 0.85), bandA_bottom + 25)])
+E(ids["Simulation"], ids["Map"], COMPOSE + side(0.65, 0, 0, 0.5), "map 1",
+  points=[(gx("Simulation", 0.65), lane + 18), (mv_right + 75, lane + 18), (mv_right + 75, gy("Map", 0.5))])
+E(ids["Simulation"], ids["Master"], AGGREG + side(0.45, 0, 1, 0.45), "masters 4",
+  points=[(gx("Simulation", 0.45), lane + 36), (far_right, lane + 36), (far_right, gy("Master", 0.45))])
+E(ids["Simulation"], ids["SimulationView"], DEPEND + side(0.2, 0, 0.5, 0), "renders on",
+  points=[(gx("Simulation", 0.2), lane + 54), (gx("SimulationView", 0.5), lane + 54)])
+
 save_list = [core]
 
 # ---- page 2: graphical view
