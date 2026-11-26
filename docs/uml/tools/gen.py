@@ -227,8 +227,8 @@ P = Placer(core)
 G = 40
 Y0 = 150
 # ---------------- band 1: engine + beings
-r1, b1 = P.stack(["Main", "Simulation", "EventManager"], 20, Y0)
-r2, b2 = P.stack(["RandomGen", "EventLog"], r1 + G, Y0)
+r1, b1 = P.stack(["Main", "Simulation", "EventManager", "Statistics"], 20, Y0)
+r2, b2 = P.stack(["RandomGen", "EventLog", "SelfTest"], r1 + G, Y0)
 xm = r2 + G * 1.5
 P.put("Being", xm, Y0)
 agent_y = Y0 + P.geo["Being"][3] + G * 1.5
@@ -308,6 +308,8 @@ E(ids["ConsoleRenderer"], ids["SimulationView"], REALIZE + UP)
 # associations and dependencies
 E(ids["Main"], ids["Simulation"], DEPEND + DOWN, "creates")
 E(ids["Simulation"], ids["EventManager"], COMPOSE + DOWN, "events 1")
+E(ids["Statistics"], ids["Simulation"], DEPEND + side(1, 0.5, 0.95, 1), "replays N games",
+  points=[(gx("Simulation", 0.95), gy("Statistics", 0.5))])
 E(ids["Simulation"], ids["RandomGen"], ASSOC + side(1, 0.06, 0, 0.5), "rng 1")
 E(ids["Simulation"], ids["EventLog"], COMPOSE + side(1, 0.5, 0, 0.3), "log 1")
 lane_x = gx("EventLog", 1) + 25
@@ -383,8 +385,9 @@ sm.edge(init, home, T, "created in its SafeZone<br>EP = maxEp")
 sm.edge(home, home, T + "exitX=1;exitY=0.2;entryX=0.8;entryY=0;", "[EP &lt; 90%]<br>/ recoverEp()",
         points=[(600, 136), (600, 92), (524, 92)])
 sm.edge(home, expl, T + "exitX=0;exitY=0.5;entryX=0.5;entryY=0;", "[EP &gt;= 90%]<br>leave home", points=[(210, 160)])
-sm.edge(expl, expl, T + "exitX=0.1;exitY=0;entryX=0.3;entryY=0;", "move / spendEp(2 per tile)",
-        points=[(138, 262), (174, 262)])
+sm.edge(expl, expl, T + "exitX=0;exitY=0.25;entryX=0.15;entryY=0;",
+        "move / spendEp(2 per tile)<br>enters own SafeZone<br>/ deliverToMaster()",
+        points=[(60, 320), (60, 262), (147, 262)])
 sm.edge(expl, ret, T + "exitX=1;exitY=0.35;entryX=0;entryY=0.35;", "[EP &lt; 20%]")
 sm.edge(ret, home, T + "exitX=0.5;exitY=0;entryX=1;entryY=0.75;", "enters own SafeZone<br>/ deliverToMaster()",
         points=[(730, 180)])
