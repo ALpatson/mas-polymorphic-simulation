@@ -38,7 +38,12 @@ public final class Main {
         int positional = 0;
         for (String arg : args) {
             if (arg.startsWith("--stats=")) {
-                statsRuns = Integer.parseInt(arg.substring("--stats=".length()));
+                try {
+                    statsRuns = Integer.parseInt(arg.substring("--stats=".length()));
+                } catch (NumberFormatException e) {
+                    System.err.println("Not a number: " + arg);
+                    return;
+                }
                 continue;
             }
             switch (arg) {

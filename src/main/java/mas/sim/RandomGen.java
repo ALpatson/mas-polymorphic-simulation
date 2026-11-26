@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import mas.map.Direction;
 import mas.model.RpsChoice;
 
 /**
@@ -56,11 +55,6 @@ public final class RandomGen {
 
     public <T> T pick(List<T> list) {
         return list.get(random.nextInt(list.size()));
-    }
-
-    public Direction nextDirection() {
-        Direction[] all = Direction.values();
-        return all[random.nextInt(all.length)];
     }
 
     public RpsChoice nextRps() {

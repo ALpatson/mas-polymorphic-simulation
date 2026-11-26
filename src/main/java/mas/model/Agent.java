@@ -82,10 +82,6 @@ public abstract class Agent extends Being {
             Direction dir = Direction.between(position, next);
             int remaining = planned - i;
 
-            if (!map.inBounds(next)) {
-                stopInFront(remaining, dir, map, log, "the map edge");
-                return;
-            }
             if (map.isObstacle(next)) {
                 stopInFront(remaining, dir, map, log, "an obstacle");
                 return;
@@ -354,10 +350,6 @@ public abstract class Agent extends Being {
 
     public Direction getLastDirection() {
         return lastDirection;
-    }
-
-    public Master getMaster() {
-        return master;
     }
 
     public MovementStrategy getMovement() {

@@ -48,10 +48,6 @@ public class SafeZone {
         return tiles;
     }
 
-    public int getArea() {
-        return (maxX - minX + 1) * (maxY - minY + 1);
-    }
-
     public Population getOwner() {
         return owner;
     }

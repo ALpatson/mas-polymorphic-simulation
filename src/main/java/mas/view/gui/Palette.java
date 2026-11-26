@@ -23,7 +23,6 @@ final class Palette {
     static final Color TEXT = new Color(0x2B2B2B);
     static final Color MUTED = new Color(0x6B6B6B);
     static final Color HIGHLIGHT = new Color(0xFFE34D);
-    static final Color OUTLINE = new Color(0x2A2119);
 
     static Color team(Population p) {
         return switch (p) {

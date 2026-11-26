@@ -3,7 +3,6 @@ package mas.model;
 import java.util.Collection;
 
 import mas.map.Map;
-import mas.map.SafeZone;
 import mas.sim.EventLog;
 
 /**
@@ -13,8 +12,6 @@ import mas.sim.EventLog;
 public abstract class Master extends Being {
 
     private static int masterCount = 0;
-
-    private SafeZone safeZone;
 
     protected Master(Population population) {
         super(population, "M" + population.getLetter());
@@ -34,14 +31,6 @@ public abstract class Master extends Being {
 
     public int getScore() {
         return messages.size();
-    }
-
-    public SafeZone getSafeZone() {
-        return safeZone;
-    }
-
-    public void assignSafeZone(SafeZone safeZone) {
-        this.safeZone = safeZone;
     }
 
     /**

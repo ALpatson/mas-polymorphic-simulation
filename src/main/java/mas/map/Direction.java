@@ -38,10 +38,6 @@ public enum Direction {
         return shortName;
     }
 
-    public boolean isDiagonal() {
-        return dx != 0 && dy != 0;
-    }
-
     public Direction opposite() {
         return values()[(ordinal() + 4) % 8];
     }

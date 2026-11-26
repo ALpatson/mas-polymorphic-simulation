@@ -48,10 +48,6 @@ public abstract class Being {
         return Collections.unmodifiableSet(messages);
     }
 
-    public boolean hasMessage(String message) {
-        return messages.contains(message);
-    }
-
     public boolean addMessage(String message) {
         return messages.add(message);
     }

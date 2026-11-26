@@ -119,11 +119,6 @@ public class Map {
         return result;
     }
 
-    /** True when the being could step onto p right now. */
-    public boolean canEnter(Position p, Being being) {
-        return inBounds(p) && getTile(p).isFree() && !isForbiddenFor(p, being.getPopulation());
-    }
-
     /**
      * Direction to take from p to reach the SafeZone of the given population
      * (straight-line heading, brief requirement). Null when p is already inside.

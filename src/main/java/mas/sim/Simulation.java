@@ -60,7 +60,6 @@ public class Simulation {
             Master master = masterOf(population);
             master.resetForNewGame();
             SafeZone zone = map.getSafeZone(population);
-            master.assignSafeZone(zone);
             map.place(master, zone.getMasterPosition());
             masters.add(master);
 

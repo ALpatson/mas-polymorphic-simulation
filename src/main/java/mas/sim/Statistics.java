@@ -43,11 +43,11 @@ public final class Statistics {
             } else {
                 draws++;
             }
+            if (winners.get(0).getScore() == sim.getTotalMessages()) {
+                fullCollections++; // once per game, even when two Masters tie at the full score
+            }
             for (Master m : sim.getMasters()) {
                 scores.put(m.getPopulation(), scores.get(m.getPopulation()) + m.getScore());
-                if (m.getScore() == sim.getTotalMessages()) {
-                    fullCollections++;
-                }
             }
             for (Agent a : sim.getAgents()) {
                 if (a.isExhausted()) {

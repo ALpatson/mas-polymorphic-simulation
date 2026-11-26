@@ -76,10 +76,10 @@ public class ConsoleRenderer implements SimulationView {
             appendCounters(out, sim);
         }
         out.append(bold("=== END OF SIMULATION after " + sim.getStep() + " steps ===")).append("\n");
-        if (sim.getStep() >= sim.getMaxSteps()) {
-            out.append("Reason: step limit reached.\n");
-        } else if (winners.get(0).getScore() == sim.getTotalMessages()) {
+        if (winners.get(0).getScore() == sim.getTotalMessages()) {
             out.append("Reason: a Master collected every message.\n");
+        } else if (sim.getStep() >= sim.getMaxSteps()) {
+            out.append("Reason: step limit reached.\n");
         } else {
             out.append("Reason: no agent can move any more.\n");
         }

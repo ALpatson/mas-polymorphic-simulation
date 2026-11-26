@@ -3,6 +3,7 @@
 Usage: py -I gen.py members.json out_dir
 """
 import json
+import zlib
 import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -58,7 +59,7 @@ class Diagram:
         return cid
 
     def xml(self):
-        return (f'<diagram name="{attr(self.name)}" id="{abs(hash(self.name)) % 10**8}">'
+        return (f'<diagram name="{attr(self.name)}" id="{zlib.crc32(self.name.encode())}">'
                 '<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" '
                 'fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">'
                 '<root><mxCell id="0"/><mxCell id="1" parent="0"/>' + "".join(self.cells) + "</root></mxGraphModel></diagram>")

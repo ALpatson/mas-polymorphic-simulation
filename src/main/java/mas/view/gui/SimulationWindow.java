@@ -281,7 +281,9 @@ public final class SimulationWindow extends JFrame implements SimulationView {
         double dt = lastTick == 0 ? 16 : Math.min(100, (now - lastTick) / 1e6);
         lastTick = now;
         if (!running) {
-            mapPanel.repaint(); // keeps the title screen alive
+            if (sim.getStep() == 0) {
+                mapPanel.repaint(); // only the title screen animates while paused
+            }
             return;
         }
         double speed = SPEEDS[speedBox.getSelectedIndex()];
